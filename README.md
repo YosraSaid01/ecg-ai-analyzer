@@ -7,8 +7,6 @@
 ![Data](https://img.shields.io/badge/Data-MIT--BIH%20Arrhythmia-green?style=for-the-badge)
 
 ---
-<img width="2559" height="1269" alt="image" src="https://github.com/user-attachments/assets/99eb3ed9-8ec8-4f31-ba80-5f3ee2f5f680" />
-
 
 ## 📖 Overview
 
@@ -29,6 +27,8 @@ The system performs:
 > ⚡ **Key idea:** bridge the gap between **signal processing** and **clinical reasoning** — without deep learning or external APIs.
 
 ---
+<img width="2559" height="1269" alt="image" src="https://github.com/user-attachments/assets/08e57abf-8ba1-418b-9f28-fbcdd8a62790" />
+
 
 ## 🧠 Features
 
