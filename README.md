@@ -226,7 +226,7 @@ Similar principles are used in ECG monitoring systems, clinical decision support
 **Yosra Said** — Biomedical Engineer · Medical Imaging & AI
 
 [![GitHub](https://img.shields.io/badge/GitHub-YosraSaid01-black?style=flat-square&logo=github)](https://github.com/YosraSaid01)
-[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=flat-square&logo=linkedin)](https://linkedin.com/in/your-link)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=flat-square&logo=linkedin)](www.linkedin.com/in/yosra-said-925131257)
 
 ---
 
