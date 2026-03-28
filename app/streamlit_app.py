@@ -517,7 +517,6 @@ def _fig_to_png_bytes(fig, width=1400, height=400) -> bytes:
         buf.seek(0)
         png_bytes = buf.read()
         if png_bytes and len(png_bytes) > 0:
-            st.info("ECG image exported via matplotlib fallback (kaleido unavailable).")
             return png_bytes
     except Exception:
         pass
