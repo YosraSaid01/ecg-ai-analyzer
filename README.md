@@ -7,6 +7,8 @@
 ![Data](https://img.shields.io/badge/Data-MIT--BIH%20Arrhythmia-green?style=for-the-badge)
 
 ---
+<img width="2559" height="1269" alt="image" src="https://github.com/user-attachments/assets/99eb3ed9-8ec8-4f31-ba80-5f3ee2f5f680" />
+
 
 ## 📖 Overview
 
