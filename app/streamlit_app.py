@@ -425,13 +425,112 @@ def _check_mitbih_available() -> list:
 
 
 def _fig_to_png_bytes(fig, width=1400, height=400) -> bytes:
-    """Export a Plotly figure to PNG bytes for the PDF report."""
+    """Export a Plotly figure to PNG bytes for the PDF report.
+
+    Strategy (in order):
+        1. Build a new static-safe figure by converting any Scattergl
+           traces into plain Scatter traces (Scattergl uses WebGL which
+           renders blank in kaleido's headless Chromium on the cloud).
+        2. Try Plotly's kaleido engine — fast, high-quality.
+        3. If kaleido fails, fall back to a pure matplotlib render that
+           extracts trace data from the Plotly figure.
+        4. If everything fails, return None and surface the real error.
+
+    Note: Plotly trace ``type`` is a read-only property, so we cannot
+    mutate it in place.  Instead we construct new ``go.Scatter`` objects
+    and copy the relevant visual attributes across.
+    """
+    _kaleido_err = None
+
+    # ── Build a static-safe copy with Scatter instead of Scattergl ─
+    fig_static = go.Figure()
+    fig_static.update_layout(fig.layout)
+
+    for trace in fig.data:
+        if trace.type == "scattergl":
+            # Build a plain Scatter with the same visual properties.
+            new_trace = go.Scatter(
+                x=trace.x,
+                y=trace.y,
+                mode=trace.mode,
+                name=trace.name,
+                hovertemplate=trace.hovertemplate,
+                opacity=trace.opacity,
+                showlegend=trace.showlegend,
+            )
+            if trace.line is not None and trace.line.color is not None:
+                new_trace.line = trace.line.to_plotly_json()
+            if trace.marker is not None and trace.marker.color is not None:
+                new_trace.marker = trace.marker.to_plotly_json()
+            fig_static.add_trace(new_trace)
+        else:
+            fig_static.add_trace(trace)
+
+    # ── Attempt 1: kaleido ─────────────────────────────────────────
     try:
-        return fig.to_image(format="png", width=width, height=height,
-                            scale=2, engine="kaleido")
+        png_bytes = fig_static.to_image(
+            format="png", width=width, height=height,
+            scale=2, engine="kaleido",
+        )
+        if png_bytes and len(png_bytes) > 0:
+            return png_bytes
+    except Exception as e:
+        _kaleido_err = e
+
+    # ── Attempt 2: pure matplotlib fallback ────────────────────────
+    try:
+        import matplotlib
+        matplotlib.use("Agg")
+        import matplotlib.pyplot as _plt
+
+        mfig, ax = _plt.subplots(figsize=(width / 100, height / 100), dpi=200)
+        mfig.patch.set_facecolor("#0F1923")
+        ax.set_facecolor("#131D2B")
+        for trace in fig_static.data:
+            if trace.x is not None and trace.y is not None:
+                if trace.mode and "markers" in trace.mode and "lines" not in trace.mode:
+                    c = "#EF4444"
+                    if trace.marker is not None and trace.marker.color is not None:
+                        c = trace.marker.color
+                    ax.plot(trace.x, trace.y, "o", markersize=3,
+                            color=c, label=trace.name or "")
+                else:
+                    c = "#00D4AA"
+                    if trace.line is not None and trace.line.color is not None:
+                        c = trace.line.color
+                    ax.plot(trace.x, trace.y, linewidth=0.8,
+                            color=c, label=trace.name or "")
+        ax.set_xlabel("Time (s)", color="#94A3B8", fontsize=8)
+        ax.set_ylabel("Amplitude", color="#94A3B8", fontsize=8)
+        ax.tick_params(colors="#64748B", labelsize=7)
+        ax.legend(fontsize=7, loc="upper right", facecolor="#131D2B",
+                  edgecolor="#1E3A50", labelcolor="#94A3B8")
+        ax.grid(True, alpha=0.15, color="#1E3A50")
+        for spine in ax.spines.values():
+            spine.set_color("#1E3A50")
+        mfig.tight_layout()
+
+        buf = io.BytesIO()
+        mfig.savefig(buf, format="png", facecolor=mfig.get_facecolor(),
+                     bbox_inches="tight")
+        _plt.close(mfig)
+        buf.seek(0)
+        png_bytes = buf.read()
+        if png_bytes and len(png_bytes) > 0:
+            st.info("ECG image exported via matplotlib fallback (kaleido unavailable).")
+            return png_bytes
     except Exception:
-        # kaleido not available -- skip image in report
-        return None
+        pass
+
+    # ── All attempts failed — surface the real error ──────────────
+    err_msg = f"Kaleido error: {_kaleido_err}" if _kaleido_err else "Unknown export failure"
+    st.error(
+        f"ECG image export failed: {err_msg}\n\n"
+        "**Hint:** Plotly image export requires `kaleido` with working "
+        "system libraries. Add `kaleido` to your requirements.txt and "
+        "ensure your deployment environment supports headless Chromium."
+    )
+    return None
 
 
 def _build_abnormal_minimap(detected_peaks, feats, fs, duration_sec,
@@ -1200,8 +1299,14 @@ if st.session_state.step >= 5 and st.session_state.rule_results is not None:
                     height=350,
                 )
                 ecg_png = _fig_to_png_bytes(fig_export)
-            except Exception:
-                pass
+            except Exception as e:
+                st.error(f"⚠️ Failed to build ECG export figure: {e}")
+
+            if ecg_png is None:
+                st.warning(
+                    "ECG image will be missing from the PDF report. "
+                    "The report will still be generated with all other data."
+                )
 
             pw_mean = float(np.mean(feats.qrs_duration_ms)) if (
                 feats.qrs_duration_ms is not None and len(feats.qrs_duration_ms) > 0
