@@ -1,220 +1,233 @@
 # 🫀 ECG AI Analyzer
 
-<p align="center">
-Signal Processing · Clinical Feature Extraction · Explainable Rhythm Analysis
-</p>
+> **Signal Processing · Clinical Feature Extraction · Explainable Rhythm Analysis**
 
-<p align="center">
-<img src="https://img.shields.io/badge/Domain-Medical%20Signal%20Processing-red?style=for-the-badge" />
-<img src="https://img.shields.io/badge/Type-Explainable%20AI-blue?style=for-the-badge" />
-<img src="https://img.shields.io/badge/Data-MIT--BIH%20Arrhythmia-green?style=for-the-badge" />
-</p>
+![Domain](https://img.shields.io/badge/Domain-Medical%20Signal%20Processing-red?style=for-the-badge)
+![Type](https://img.shields.io/badge/Type-Explainable%20AI-blue?style=for-the-badge)
+![Data](https://img.shields.io/badge/Data-MIT--BIH%20Arrhythmia-green?style=for-the-badge)
 
 ---
 
-## 📖 Project Overview
+## 📖 Overview
 
-A modular, production-style ECG analysis pipeline that transforms raw signals into **clinically interpretable insights**.
+A modular, production-style ECG analysis pipeline that transforms raw signals into **clinically interpretable insights**, built on the **MIT-BIH Arrhythmia Database (PhysioNet)**.
 
-Built on the **MIT-BIH Arrhythmia Database (PhysioNet)**, this project demonstrates how to go from:
-
-➡️ Raw ECG signal → Signal processing → Feature extraction → Clinical interpretation
+```
+Raw ECG signal → Signal processing → Feature extraction → Clinical interpretation
+```
 
 The system performs:
 
-- R-peak detection  
-- Heart rate & HRV computation  
-- Rule-based abnormality detection  
-- Evaluation against expert annotations  
-- Generation of a structured clinical narrative  
+- R-peak detection
+- Heart rate & HRV computation
+- Rule-based abnormality detection
+- Evaluation against expert annotations
+- Generation of a structured clinical narrative
 
-⚡ **Key idea:** bridge the gap between **signal processing** and **clinical reasoning**, without deep learning or external APIs.
-
----
-
-## 🧠 Key Features
-
-- 📈 **Robust preprocessing**
-  - Bandpass filtering (0.5–40 Hz)
-  - Baseline removal
-  - Normalization
-
-- ❤️ **R-peak detection**
-  - Adaptive detection using `scipy.signal.find_peaks`
-
-- 📊 **Clinical feature extraction**
-  - Heart rate (HR)
-  - RR intervals
-  - HRV metrics (SDNN, RMSSD, pNN50)
-
-- ⚠️ **Explainable abnormality detection**
-  - Tachycardia / Bradycardia
-  - Irregular rhythm detection
-  - Fully rule-based → interpretable
-
-- 🧪 **Evaluation against expert annotations**
-  - Precision / Recall / F1-score
-  - AAMI-style matching
-
-- 📝 **Clinical narrative generation**
-  - Structured interpretation
-  - Deterministic (no LLM / no API)
-
-- 📉 **Visualization**
-  - ECG + detected peaks
-  - Heart rate evolution
-  - Highlighted abnormal segments
+> ⚡ **Key idea:** bridge the gap between **signal processing** and **clinical reasoning** — without deep learning or external APIs.
 
 ---
 
-## ⚙️ Pipeline Overview
+## 🧠 Features
+
+| Category | Details |
+|---|---|
+| 📈 **Preprocessing** | Bandpass filtering (0.5–40 Hz), baseline removal, normalization |
+| ❤️ **R-peak detection** | Adaptive detection via `scipy.signal.find_peaks` |
+| 📊 **Clinical features** | Heart rate, RR intervals, HRV metrics (SDNN, RMSSD, pNN50) |
+| ⚠️ **Abnormality detection** | Tachycardia / Bradycardia / irregular rhythm — fully rule-based |
+| 🧪 **Evaluation** | Precision / Recall / F1-score, AAMI-style annotation matching |
+| 📝 **Clinical narrative** | Structured, deterministic interpretation (no LLM / no API) |
+| 📉 **Visualization** | ECG + detected peaks, heart rate evolution, highlighted abnormal segments |
+
+---
+
+## ⚙️ Pipeline
+
+```
 MIT-BIH Record
-│
-▼
-┌──────────────┐
-│ data_loader │ Load ECG signal + expert annotations (WFDB)
-└──────┬───────┘
-▼
-┌──────────────┐
-│ preprocess │ Bandpass (0.5–40 Hz) + normalization
-└──────┬───────┘
-▼
-┌──────────────┐
-│ peaks │ R-peak detection (adaptive)
-└──────┬───────┘
-▼
-┌──────────────┐
-│ features │ HR, RR intervals, HRV metrics
-└──────┬───────┘
-▼
-┌──────────────┐
-│ rules │ Clinical abnormality detection
-└──────┬───────┘
-▼
-┌──────────────┐
-│ evaluate │ Metrics vs expert annotations
-└──────┬───────┘
-▼
-┌──────────────┐
-│ visualize │ ECG plots + abnormal segments
-└──────┬───────┘
-▼
-┌──────────────┐
-│ explainer │ Clinical narrative (rule-based)
-└──────────────┘
+      │
+      ▼
+┌─────────────┐
+│ data_loader │  Load ECG signal + expert annotations (WFDB)
+└──────┬──────┘
+       ▼
+┌─────────────┐
+│  preprocess │  Bandpass (0.5–40 Hz) + normalization
+└──────┬──────┘
+       ▼
+┌─────────────┐
+│    peaks    │  R-peak detection (adaptive)
+└──────┬──────┘
+       ▼
+┌─────────────┐
+│   features  │  HR, RR intervals, HRV metrics
+└──────┬──────┘
+       ▼
+┌─────────────┐
+│    rules    │  Clinical abnormality detection
+└──────┬──────┘
+       ▼
+┌─────────────┐
+│   evaluate  │  Metrics vs expert annotations
+└──────┬──────┘
+       ▼
+┌─────────────┐
+│  visualize  │  ECG plots + abnormal segments
+└──────┬──────┘
+       ▼
+┌─────────────┐
+│  explainer  │  Clinical narrative (rule-based)
+└─────────────┘
+```
 
 ---
 
 ## 🗂️ Project Structure
+
+```
 ecg-ai-analyzer/
 │
 ├── app/
-│ ├── main.py # Full pipeline orchestrator (CLI)
-│ ├── data_loader.py # MIT-BIH loading (WFDB)
-│ ├── preprocess.py # Filtering & normalization
-│ ├── peaks.py # R-peak detection
-│ ├── features.py # HR & HRV extraction
-│ ├── rules.py # Abnormality detection
-│ ├── evaluate.py # Performance metrics
-│ ├── visualize.py # ECG plotting
-│ └── llm_explainer.py # Clinical explanation generator
+│   ├── main.py            # Full pipeline orchestrator (CLI)
+│   ├── data_loader.py     # MIT-BIH loading (WFDB)
+│   ├── preprocess.py      # Filtering & normalization
+│   ├── peaks.py           # R-peak detection
+│   ├── features.py        # HR & HRV extraction
+│   ├── rules.py           # Abnormality detection
+│   ├── evaluate.py        # Performance metrics
+│   ├── visualize.py       # ECG plotting
+│   └── llm_explainer.py   # Clinical explanation generator
 │
 ├── data/
-│ └── mitdb/ # MIT-BIH dataset files
+│   └── mitdb/             # MIT-BIH dataset files
 │
-├── notebooks/ # Exploration notebooks
+├── notebooks/             # Exploration notebooks
 ├── requirements.txt
 └── README.md
+```
+
 ---
 
-🛠️ Installation
+## 🛠️ Installation
+
+```bash
 git clone https://github.com/your-username/ecg-ai-analyzer.git
 cd ecg-ai-analyzer
 
 python -m venv venv
-source venv/bin/activate        # macOS / Linux
-venv\Scripts\activate           # Windows
+source venv/bin/activate       # macOS / Linux
+venv\Scripts\activate          # Windows
 
 pip install -r requirements.txt
-📥 Download Dataset
+```
+
+### 📥 Download Dataset
+
+```bash
 python -c "import wfdb; wfdb.dl_database('mitdb', 'data/mitdb')"
+```
 
-Or manually from:
-https://physionet.org/content/mitdb/1.0.0/
+Or download manually from [PhysioNet](https://physionet.org/content/mitdb/1.0.0/).
 
-▶️ Usage
-Run full pipeline
+---
+
+## ▶️ Usage
+
+**Run the full pipeline:**
+
+```bash
 python app/main.py
-Example with parameters
+```
+
+**With parameters:**
+
+```bash
 python app/main.py --record 201 --start 10 --duration 20 --save-plots
-Argument	Description	Default
---record	Record ID (e.g. 100, 201)	100
---start	Start time (s)	0
---duration	Window duration (s)	10
---save-plots	Save outputs	False
-🔬 Signal Processing Details
-Step	Method
-Filtering	Butterworth bandpass (0.5–40 Hz)
-Baseline removal	High-pass filtering
-Normalization	Z-score
-Peak detection	Adaptive prominence (find_peaks)
-📊 Evaluation Methodology
-Reference: Expert cardiologist annotations
-Tolerance window: ±150 ms
-Matching: Greedy nearest-neighbor
-Metrics:
-Precision
-Recall
-F1-score
-Temporal offset error
-🧬 Dataset
+```
 
-MIT-BIH Arrhythmia Database (PhysioNet)
+| Argument | Description | Default |
+|---|---|---|
+| `--record` | Record ID (e.g. `100`, `201`) | `100` |
+| `--start` | Start time (s) | `0` |
+| `--duration` | Window duration (s) | `10` |
+| `--save-plots` | Save output plots | `False` |
 
-48 annotated ECG recordings
-360 Hz sampling frequency
-Clinical-grade annotations
-Gold standard for arrhythmia research
+---
 
-📚 References:
+## 🔬 Signal Processing
 
-Moody & Mark, IEEE EMBS (2001)
-Goldberger et al., Circulation (2000)
-🎯 Why This Project Matters
+| Step | Method |
+|---|---|
+| Filtering | Butterworth bandpass (0.5–40 Hz) |
+| Baseline removal | High-pass filtering |
+| Normalization | Z-score |
+| Peak detection | Adaptive prominence (`find_peaks`) |
 
-This project showcases:
+---
 
-Biomedical signal processing expertise
-Clinical reasoning from data
-Explainable AI (rule-based interpretation)
-Reproducible medical pipelines
-End-to-end system design (data → insights)
+## 📊 Evaluation Methodology
 
-💡 Similar principles are used in:
+- **Reference:** Expert cardiologist annotations
+- **Tolerance window:** ±150 ms
+- **Matching:** Greedy nearest-neighbor
+- **Metrics:** Precision · Recall · F1-score · Temporal offset error
 
-ECG monitoring systems
-Clinical decision support tools
-Medical device software pipelines
+---
 
-🚀 Future Improvements
+## 🧬 Dataset
 
-Deep learning (CNN / LSTM for arrhythmia classification)
-Streamlit web interface (interactive ECG analysis)
-Multi-lead ECG processing
-Real-time monitoring pipeline
-Advanced HRV (frequency-domain, nonlinear metrics)
-⚠️ Disclaimer
+**MIT-BIH Arrhythmia Database** — [PhysioNet](https://physionet.org/content/mitdb/1.0.0/)
 
-This project is intended for research, education, and demonstration purposes only.
-It is not a medical device and must not be used for clinical diagnosis.
+- 48 annotated ECG recordings
+- 360 Hz sampling frequency
+- Clinical-grade annotations
+- Gold standard for arrhythmia research
 
-👩‍💻 Author
+**References:**
+- Moody & Mark, *IEEE EMBS* (2001)
+- Goldberger et al., *Circulation* (2000)
 
-Yosra Said
-Biomedical Engineer — Medical Imaging & AI
+---
 
-GitHub: https://github.com/YosraSaid01
-LinkedIn: (add your link)
-⭐ If you like this project
+## 🎯 Why This Project Matters
 
-Give it a star ⭐ and feel free to connect!
+This project demonstrates:
+
+- **Biomedical signal processing** expertise
+- **Clinical reasoning** from raw data
+- **Explainable AI** through rule-based interpretation
+- **Reproducible medical pipelines**
+- **End-to-end system design** — from raw signal to structured insight
+
+Similar principles are used in ECG monitoring systems, clinical decision support tools, and medical device software pipelines.
+
+---
+
+## 🚀 Future Improvements
+
+- [ ] Deep learning (CNN / LSTM for arrhythmia classification)
+- [ ] Streamlit web interface for interactive ECG analysis
+- [ ] Multi-lead ECG processing
+- [ ] Real-time monitoring pipeline
+- [ ] Advanced HRV (frequency-domain, nonlinear metrics)
+
+---
+
+## ⚠️ Disclaimer
+
+> This project is intended for **research, education, and demonstration purposes only**.
+> It is **not a medical device** and must not be used for clinical diagnosis.
+
+---
+
+## 👩‍💻 Author
+
+**Yosra Said** — Biomedical Engineer · Medical Imaging & AI
+
+[![GitHub](https://img.shields.io/badge/GitHub-YosraSaid01-black?style=flat-square&logo=github)](https://github.com/YosraSaid01)
+[![LinkedIn](https://img.shields.io/badge/LinkedIn-Connect-blue?style=flat-square&logo=linkedin)](https://linkedin.com/in/your-link)
+
+---
+
+*If this project was useful, give it a ⭐ and feel free to connect!*
